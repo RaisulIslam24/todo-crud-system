@@ -15,7 +15,7 @@ export default function DashboardPage() {
       else router.push('/login')
     })
     return () => unsub()
-  }, [])
+  }, [router])
 
   const logout = async () => {
     await signOut(auth)

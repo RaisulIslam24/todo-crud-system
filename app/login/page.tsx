@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { signInWithEmailAndPassword } from 'firebase/auth'
 import { auth } from '@/lib/firebase'
 import { useRouter } from 'next/navigation'
+import { FirebaseError } from 'firebase/app'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -25,8 +26,17 @@ export default function LoginPage() {
       setLoading(true)
       await signInWithEmailAndPassword(auth, email, password)
       router.push('/dashboard')
-    } catch (err: any) {
-      setError('Invalid email or password. Please try again.')
+    } catch (err) {
+      const error = err as FirebaseError
+      if (error.code === 'auth/email-already-in-use') {
+        setError('This email is already registered.')
+      } else if (error.code === 'auth/invalid-email') {
+        setError('Invalid email address.')
+      } else if (error.code === 'auth/weak-password') {
+        setError('Password should be at least 6 characters.')
+      } else {
+        setError('Something went wrong. Please try again.')
+      }
     } finally {
       setLoading(false)
     }
